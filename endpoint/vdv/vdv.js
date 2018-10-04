@@ -39,6 +39,7 @@ const VDV_ARCHIVED_DIR = VDV_ROOT + '/' + VDV_ARCHIVED_DATE;
 const VDV_ARCHIVED_ZIP = VDV_ARCHIVED_DIR + '.zip';
 
 const APP_ZIP_FILE = `${VDV_APP_ROOT}/data.zip`;
+const GTFS_ZIP_FILE = `${GTFS_ROOT}/gtfs.zip`;
 
 const VALIDITY = "BASIS_VER_GUELTIGKEIT.x10";
 const CALENDAR = "FIRMENKALENDER.x10";
@@ -1270,6 +1271,28 @@ function generateGtfsFiles() {
 
         .then(() => {
             return generateAgencyTxt()
+        })
+
+        .then(() => {
+            if (fs.existsSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`)) {
+                logger.info(`Deleting old zip '${GTFS_ZIP_FILE}'`);
+                fs.unlinkSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`);
+            }
+
+            logger.info(`Compressing files as '${GTFS_ZIP_FILE}'`);
+
+            const command = `zip -j -D ${GTFS_ZIP_FILE} ${GTFS_ROOT}/*.json`;
+            const zip = spawn('/bin/sh', ['-c', command]);
+
+            console.log(`Zip: stdout: ${zip.stdout.toString()}`);
+
+            if (zip.status !== 0) {
+                throw new HttpError(`Zip exited with status code '${zip.status}', stderr=${zip.stderr.toString()}`, 500)
+            }
+
+            logger.info("File compression successful");
+
+            return null
         })
 
 }
