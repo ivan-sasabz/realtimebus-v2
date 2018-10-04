@@ -9,6 +9,8 @@ agency_id,route_id,route_short_name,route_long_name,route_type
 101,1011,11 BZ,11,3
 101,1012,12 BZ,12,3
 101,1014,14 BZ,14,3
+101,1015,15 BZ,15,3
+101,1018,18 BZ,18,3
 101,1071,7A BZ,7A,3
 101,1072,7B BZ,7B,3
 101,110,110 BZ,110,3
@@ -31,6 +33,8 @@ agency_id,route_id,route_short_name,route_long_name,route_type
 101,215,215 ME,215,3
 101,221,221 ME,221,3
 101,222,222 ME,222,3
+101,223,223 ME,223,3
+101,224,224 ME,224,3
 101,225,225 ME,225,3
 101,248,248 ME,248,3
 101,3,3 ME,3,3
