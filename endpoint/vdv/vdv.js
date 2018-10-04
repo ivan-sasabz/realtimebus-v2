@@ -1281,7 +1281,7 @@ function generateGtfsFiles() {
 
             logger.info(`Compressing files as '${GTFS_ZIP_FILE}'`);
 
-            const command = `zip -j -D ${GTFS_ZIP_FILE} ${GTFS_ROOT}/*.json`;
+            const command = `zip -j -D ${GTFS_ZIP_FILE} ${GTFS_ROOT}/*.txt`;
             const zip = spawn('/bin/sh', ['-c', command]);
 
             console.log(`Zip: stdout: ${zip.stdout.toString()}`);
