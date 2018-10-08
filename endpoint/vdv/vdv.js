@@ -1381,7 +1381,7 @@ function appendRouteColors(client) {
                         dataArray.push(data);
                     })
                     .on('end', function () {
-                        let result = json2csv({data: dataArray, fields: Object.keys(dataArray[0])});
+                        let result = json2csv.parse({data: dataArray, fields: Object.keys(dataArray[0])});
                         fs.writeFileSync(file, result);
 
                         resolve()
