@@ -1374,9 +1374,10 @@ function appendRouteColors(client) {
                         output += `${line},route_color`;
                         firstLine = false;
                     } else {
-                        let color = colors[line.split(",")[1]];
+                        let lineId = line.split(",")[1];
+                        let color = colors[lineId];
 
-                        logger.info(`Color for line ${data.route_id}: ${color}`);
+                        logger.info(`Color for line ${lineId}: ${color}`);
 
                         output += `${line},${color}`;
                     }
