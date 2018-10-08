@@ -1364,14 +1364,21 @@ function appendRouteColors(client) {
         })
         .then()
         .then(colors => {
-            return new Promise(function (resolve) {
+            return new Promise(function (resolve, reject) {
                 let output = [];
 
                 let file = `${GTFS_ROOT}/routes.txt`;
 
                 let firstLine = true;
 
-                fs.createReadStream(file).on('line', function (line) {
+                let stream = fs.createReadStream(file);
+                stream.on("error", function (error) {
+                    reject(error)
+                });
+
+                reader.createInterface({
+                    input: stream
+                }).on('line', function (line) {
                     if (firstLine) {
                         output += `${line},route_color`;
                         firstLine = false;
