@@ -1371,7 +1371,7 @@ function appendRouteColors(client) {
                     input: stream
                 }).on('line', function (line) {
                     if (firstLine) {
-                        output += `${line},route_color`;
+                        output += `${line},route_color\n`;
                         firstLine = false;
                     } else {
                         let lineId = line.split(",")[1];
@@ -1379,7 +1379,7 @@ function appendRouteColors(client) {
 
                         logger.info(`Color for line ${lineId}: ${color}`);
 
-                        output += `${line},${color}`;
+                        output += `${line},${color}\n`;
                     }
                 }).on('close', function () {
                     fs.writeFileSync(file, output);
