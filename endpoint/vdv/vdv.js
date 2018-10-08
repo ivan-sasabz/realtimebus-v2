@@ -1362,30 +1362,30 @@ function appendRouteColors(client) {
 
             return colors
         })
+        .then()
         .then(colors => {
             return new Promise(function (resolve) {
-                let dataArray = [];
+                let output = [];
 
                 let file = `${GTFS_ROOT}/routes.txt`;
 
-                fs.createReadStream(file)
-                    .pipe(csv())
-                    .on('data', function (data) {
-                        logger.info(data);
+                let firstLine = true;
 
-                        let color = colors[data.route_id];
+                fs.createReadStream(file).on('line', function (line) {
+                    if (firstLine) {
+                        output += `${line},route_color`;
+                        firstLine = false;
+                    } else {
+                        let color = colors[line.split(",")[1]];
 
                         logger.info(`Color for line ${data.route_id}: ${color}`);
 
-                        data.route_color = color;
-                        dataArray.push(data);
-                    })
-                    .on('end', function () {
-                        let result = json2csv.parse({data: dataArray, fields: Object.keys(dataArray[0])});
-                        fs.writeFileSync(file, result);
-
-                        resolve()
-                    });
+                        output += `${line},${color}`;
+                    }
+                }).on('end', function () {
+                    fs.writeFileSync(file, output);
+                    resolve()
+                });
             })
         })
 }
