@@ -6,6 +6,10 @@ const path = require('path');
 const mime = require('mime');
 
 const moment = require('moment');
+
+const csv = require('csv-parser');
+const json2csv = require('json2csv');
+
 require("moment-timezone");
 
 const AdmZip = require("adm-zip");
@@ -316,17 +320,32 @@ module.exports.generateAppZip = function (req, res) {
 };
 
 module.exports.generateGtfs = function (req, res) {
-    return generateGtfsFiles()
-        .then(lines => {
-            logger.warn("GTFS files generated");
-            res.status(200).json(lines);
+    return database.connect()
+        .then(client => {
+            return generateGtfsFiles(client)
+                .then(lines => {
+                    logger.warn("GTFS files generated");
+                    res.status(200).json(lines);
+
+                    client.release()
+                })
+                .catch(error => {
+                    logger.error("GTFS file generation failed!");
+                    logger.error(error);
+
+                    utils.respondWithError(res, error);
+
+                    client.release()
+                });
         })
         .catch(error => {
-            logger.error("GTFS file generation failed!");
-            logger.error(error);
+            logger.error(`Error acquiring client: ${error}`);
 
-            utils.respondWithError(res, error);
-        });
+            utils.respondWithError(error);
+            utils.handleError(error);
+        })
+
+
 };
 
 
@@ -870,7 +889,7 @@ function performDataCalculation(client) {
             return generateZipForApp(client)
         })
         .then(() => {
-            return generateGtfsFiles()
+            return generateGtfsFiles(client)
         })
 }
 
@@ -1231,7 +1250,7 @@ function getLinePath(client) {
 
 // <editor-fold desc="GTFS FILES GENERATION">
 
-function generateGtfsFiles() {
+function generateGtfsFiles(client) {
     logger.warn("Generating GTFS files");
 
     let mainFile = {};
@@ -1274,6 +1293,10 @@ function generateGtfsFiles() {
         })
 
         .then(() => {
+            return appendRouteColors(client)
+        })
+
+        .then(() => {
             if (fs.existsSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`)) {
                 logger.info(`Deleting old zip '${GTFS_ZIP_FILE}'`);
                 fs.unlinkSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`);
@@ -1309,6 +1332,61 @@ function generateAgencyTxt() {
         .then(() => {
             fs.writeFileSync(path.join(GTFS_ROOT, "agency.txt"), text);
             return null
+        })
+}
+
+function appendRouteColors(client) {
+    logger.warn("Appending GTFS route colors...");
+
+    return Promise.resolve()
+        .then(() => {
+            return `
+                SELECT
+                    line,
+                    hex
+                    
+                FROM data.line_colors
+            `
+        })
+        .then(sql => {
+            return client.query(sql)
+        })
+        .then(result => {
+            let colors = [];
+
+            for (let entry of result.rows) {
+                colors[entry.line] = entry.hex;
+            }
+
+            logger.info(`Line colors: ${colors}`);
+
+            return colors
+        })
+        .then(colors => {
+            return new Promise(function (resolve) {
+                let dataArray = [];
+
+                let file = `${GTFS_ROOT}/routes.txt`;
+
+                fs.createReadStream(file)
+                    .pipe(csv())
+                    .on('data', function (data) {
+                        logger.info(data);
+
+                        let color = colors[data.route_id];
+
+                        logger.info(`Color for line ${data.route_id}: ${color}`);
+
+                        data.route_color = color;
+                        dataArray.push(data);
+                    })
+                    .on('end', function () {
+                        let result = json2csv({data: dataArray, fields: Object.keys(dataArray[0])});
+                        fs.writeFileSync(file, result);
+
+                        resolve()
+                    });
+            })
         })
 }
 
