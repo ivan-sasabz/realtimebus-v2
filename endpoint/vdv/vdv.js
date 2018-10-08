@@ -1381,7 +1381,7 @@ function appendRouteColors(client) {
 
                         output += `${line},${color}`;
                     }
-                }).on('end', function () {
+                }).on('close', function () {
                     fs.writeFileSync(file, output);
                     resolve()
                 });
