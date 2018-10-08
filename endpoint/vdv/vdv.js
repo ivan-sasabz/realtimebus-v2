@@ -1339,17 +1339,8 @@ function appendRouteColors(client) {
     logger.warn("Appending GTFS route colors...");
 
     return Promise.resolve()
-        .then(() => {
-            return `
-                SELECT
-                    line,
-                    hex
-                    
-                FROM data.line_colors
-            `
-        })
         .then(sql => {
-            return client.query(sql)
+            return client.query('SELECT line, hex FROM data.line_colors')
         })
         .then(result => {
             let colors = [];
