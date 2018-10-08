@@ -1375,7 +1375,7 @@ function appendRouteColors(client) {
                         firstLine = false;
                     } else {
                         let lineId = line.split(",")[1];
-                        let color = colors[lineId];
+                        let color = colors[lineId] || "FFFFFF";
 
                         logger.info(`Color for line ${lineId}: ${color}`);
 
