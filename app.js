@@ -151,7 +151,8 @@ app.group("/app", (router) => {
 });
 
 app.group("/gtfs", (router) => {
-    router.get("/realtime", v2Realtime.positions);
+    router.get("/trip-update", v2Realtime.tripUpdate);
+    router.get("/vehicle-position", v2Realtime.vehiclePosition);
 });
 
 app.group("/firebase", (router) => {
