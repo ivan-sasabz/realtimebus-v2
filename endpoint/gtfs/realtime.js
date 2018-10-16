@@ -21,8 +21,6 @@ module.exports.tripUpdate = function (req, res) {
 
                     let message = new GtfsRealtimeBindings.FeedMessage();
 
-                    console.log(message);
-
                     let header = new GtfsRealtimeBindings.FeedHeader();
                     header.gtfs_realtime_version = "2.0";
                     header.incrementality = 0;
@@ -88,8 +86,6 @@ module.exports.vehiclePosition = function (req, res) {
                     let buses = positions.buses;
 
                     let message = new GtfsRealtimeBindings.FeedMessage();
-
-                    console.log(message);
 
                     let header = new GtfsRealtimeBindings.FeedHeader();
                     header.gtfs_realtime_version = "1.0";
