@@ -31,8 +31,6 @@ module.exports.tripUpdate = function (req, res) {
                     let entities = [];
 
                     for (let bus of buses) {
-                        console.log(bus);
-
                         let vehicleDescriptor = new GtfsRealtimeBindings.VehicleDescriptor();
                         vehicleDescriptor.id = bus.vehicle;
 
@@ -101,8 +99,6 @@ module.exports.vehiclePosition = function (req, res) {
                     let entities = [];
 
                     for (let bus of buses) {
-                        console.log(bus);
-
                         let position = new GtfsRealtimeBindings.Position();
                         position.latitude = bus.latitude;
                         position.longitude = bus.longitude;
