@@ -26,7 +26,7 @@ module.exports.tripUpdate = function (req, res) {
                     let header = new GtfsRealtimeBindings.FeedHeader();
                     header.gtfs_realtime_version = "2.0";
                     header.incrementality = 0;
-                    header.timestamp = new Date().getTime();
+                    header.timestamp = new Date().getTime() / 1000;
 
                     let entities = [];
 
@@ -96,7 +96,7 @@ module.exports.vehiclePosition = function (req, res) {
                     let header = new GtfsRealtimeBindings.FeedHeader();
                     header.gtfs_realtime_version = "1.0";
                     header.incrementality = 0;
-                    header.timestamp = new Date().getTime();
+                    header.timestamp = new Date().getTime() / 1000;
 
                     let entities = [];
 
