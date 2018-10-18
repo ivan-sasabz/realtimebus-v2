@@ -1323,8 +1323,8 @@ function generateGtfsFiles(client) {
 function generateAgencyTxt() {
     logger.warn("Generating GTFS agency.txt");
 
-    let header = "agency_id,agency_name,agency_url,agency_timezone,agency_lang";
-    let content = "101,SASA SpA-AG,http://sasabz.it,Europe/Rome,it";
+    let header = "agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_fare_url,agency_email";
+    let content = "101,SASA SpA-AG,http://sasabz.it,Europe/Rome,IT,0471519519,http://www.sasabz.it/fahrscheine/,sasabz@sasabz.it";
 
     let text = header + "\n" + content;
 
