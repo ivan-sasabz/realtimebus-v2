@@ -36,3 +36,7 @@ Array.prototype.clear = function () {
         this.pop();
     }
 };
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+};

@@ -1,14 +1,17 @@
 'use strict';
 
 require("moment");
+require("../../util/functions");
 
 const path = require('path');
 const mime = require('mime');
 
 const moment = require('moment');
 
-const csv = require('csv-parser');
+const csvParser = require('csv-parser');
 const json2csv = require('json2csv');
+
+const csv = require("csv");
 
 require("moment-timezone");
 
@@ -1295,6 +1298,12 @@ function generateGtfsFiles(client) {
         .then(() => {
             return appendRouteColors(client)
         })
+        .then(() => {
+            return fixLineNames()
+        })
+        .then(() => {
+            return fixBusStopNames()
+        })
 
         .then(() => {
             if (fs.existsSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`)) {
@@ -1353,7 +1362,6 @@ function appendRouteColors(client) {
 
             return colors
         })
-        .then()
         .then(colors => {
             return new Promise(function (resolve, reject) {
                 let output = [];
@@ -1387,6 +1395,109 @@ function appendRouteColors(client) {
                 });
             })
         })
+}
+
+function fixLineNames() {
+    logger.warn("Fixing line names for GTFS routes.txt");
+
+    let oldRouteFile = `${GTFS_ROOT}/routes.txt`;
+    let newRouteFile = `${GTFS_ROOT}/routes_new.txt`;
+
+    const oldRoutes = fs.createReadStream(oldRouteFile);
+    const newRoutes = fs.createWriteStream(newRouteFile);
+
+    return new Promise(function (resolve, reject) {
+        oldRoutes.on('error', function () {
+            reject();
+        });
+
+        newRoutes.on('error', function () {
+            reject();
+        });
+
+        newRoutes.on('finish', function () {
+            resolve();
+        });
+
+        oldRoutes
+            .pipe(csv.parse({
+                delimiter: ','
+            }))
+            .pipe(csv.transform(function (record) {
+                let short = record[2];
+
+                if (record[0] === "agency_id") {
+                    return record;
+                }
+
+                record[2] = record[3];
+                record[3] = short;
+
+                return record;
+            }))
+            .pipe(csv.stringify({
+                quoted: false
+            }))
+            .pipe(newRoutes);
+    }).then(() => {
+        fs.unlink(oldRouteFile);
+        fs.rename(newRouteFile, oldRouteFile)
+    })
+}
+
+function fixBusStopNames() {
+    logger.warn("Fixing bus stop names for GTFS routes.txt");
+
+    let oldStopFile = `${GTFS_ROOT}/stops.txt`;
+    let newStopFile = `${GTFS_ROOT}/stops_new.txt`;
+
+    const oldStops = fs.createReadStream(oldStopFile);
+    const newStops = fs.createWriteStream(newStopFile);
+
+    return new Promise(function (resolve, reject) {
+        oldStops.on('error', function () {
+            reject();
+        });
+
+        newStops.on('error', function () {
+            reject();
+        });
+
+        newStops.on('finish', function () {
+            resolve();
+        });
+
+        oldStops
+            .pipe(csv.parse({
+                delimiter: ','
+            }))
+            .pipe(csv.transform(function (record) {
+                if (record[1].indexOf("-") < 0) {
+                    return record
+                }
+
+                if (record[1].startsWith("-")) {
+                    record[1] = record[1].replace("-", "").trim();
+                } else {
+                    let split = record[1].split("-");
+                    record[1] = split[0].trim();
+                }
+
+                record[1] = record[1].capitalize();
+
+                return record;
+            }))
+            .pipe(csv.transform(function (record) {
+                return record;
+            }))
+            .pipe(csv.stringify({
+                quoted: false
+            }))
+            .pipe(newStops);
+    }).then(() => {
+        fs.unlink(oldStopFile);
+        fs.rename(newStopFile, oldStopFile)
+    })
 }
 
 // </editor-fold>
