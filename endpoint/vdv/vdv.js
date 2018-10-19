@@ -1304,6 +1304,9 @@ function generateGtfsFiles(client) {
         .then(() => {
             return fixBusStopNames()
         })
+        .then(() => {
+            return fixTripWheelChair()
+        })
 
         .then(() => {
             if (fs.existsSync(`${GTFS_ROOT}/${GTFS_ZIP_FILE}`)) {
@@ -1493,9 +1496,6 @@ function fixBusStopNames() {
 
                 return record;
             }))
-            .pipe(csv.transform(function (record) {
-                return record;
-            }))
             .pipe(csv.stringify({
                 quoted: false
             }))
@@ -1503,6 +1503,51 @@ function fixBusStopNames() {
     }).then(() => {
         fs.unlink(oldStopFile);
         fs.rename(newStopFile, oldStopFile)
+    })
+}
+
+function fixTripWheelChair() {
+    logger.warn("Fixing wheelchair access for GTFS trips.txt");
+
+    let oldTripsFile = `${GTFS_ROOT}/trips.txt`;
+    let newTripsFile = `${GTFS_ROOT}/trips_new.txt`;
+
+    const oldTrips = fs.createReadStream(oldTripsFile);
+    const newTrips = fs.createWriteStream(newTripsFile);
+
+    return new Promise(function (resolve, reject) {
+        oldTrips.on('error', function () {
+            reject();
+        });
+
+        newTrips.on('error', function () {
+            reject();
+        });
+
+        newTrips.on('finish', function () {
+            resolve();
+        });
+
+        oldTrips
+            .pipe(csv.parse({
+                delimiter: ','
+            }))
+            .pipe(csv.transform(function (record) {
+                if (record[0] === "route_id") {
+                    record.push("wheelchair_accessible");
+                } else {
+                    record.push(1);
+                }
+
+                return record;
+            }))
+            .pipe(csv.stringify({
+                quoted: false
+            }))
+            .pipe(newTrips);
+    }).then(() => {
+        fs.unlink(oldTripsFile);
+        fs.rename(newTripsFile, oldTripsFile)
     })
 }
 
