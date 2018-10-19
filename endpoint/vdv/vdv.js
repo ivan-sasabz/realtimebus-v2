@@ -1443,8 +1443,8 @@ function fixLineNames() {
             }))
             .pipe(newRoutes);
     }).then(() => {
-        fs.unlink(oldRouteFile);
-        fs.rename(newRouteFile, oldRouteFile)
+        fs.unlinkSync(oldRouteFile);
+        fs.renameSync(newRouteFile, oldRouteFile)
     })
 }
 
@@ -1501,8 +1501,8 @@ function fixBusStopNames() {
             }))
             .pipe(newStops);
     }).then(() => {
-        fs.unlink(oldStopFile);
-        fs.rename(newStopFile, oldStopFile)
+        fs.unlinkSync(oldStopFile);
+        fs.renameSync(newStopFile, oldStopFile)
     })
 }
 
@@ -1546,8 +1546,8 @@ function fixTripWheelChair() {
             }))
             .pipe(newTrips);
     }).then(() => {
-        fs.unlink(oldTripsFile);
-        fs.rename(newTripsFile, oldTripsFile)
+        fs.unlinkSync(oldTripsFile);
+        fs.renameSync(newTripsFile, oldTripsFile)
     })
 }
 
