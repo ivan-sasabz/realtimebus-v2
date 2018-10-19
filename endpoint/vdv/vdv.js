@@ -1472,6 +1472,12 @@ function fixBusStopNames() {
                 delimiter: ','
             }))
             .pipe(csv.transform(function (record) {
+                if (record[0] === "stop_id") {
+                    record.push("wheelchair_boarding");
+                } else {
+                    record.push(1);
+                }
+
                 if (record[1].indexOf("-") < 0) {
                     return record
                 }
