@@ -7,7 +7,6 @@ const logger = require("../../util/logger");
 const RealtimeModel = require("./RealtimeModel");
 const LineUtils = require("../line/LineUtils");
 
-
 module.exports = class PositionsApp {
 
     constructor(client) {
@@ -79,6 +78,7 @@ module.exports = class PositionsApp {
 
                         gps_date,
                         inserted_at,
+                        extract(epoch FROM updated_at) AS updated_at,
                         
                         next_rec_ort.ort_nr AS bus_stop,
                         
@@ -179,6 +179,8 @@ module.exports = class PositionsApp {
 
                         updated_min_ago: row.updated_min_ago,
                         inserted_min_ago: row.inserted_min_ago,
+
+                        updated_at: row.updated_at,
 
                         origin: row.origin,
                         destination: row.destination,

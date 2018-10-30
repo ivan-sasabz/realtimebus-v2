@@ -40,7 +40,7 @@ module.exports.tripUpdate = function (req, res) {
                         tripUpdate.trip = tripDescriptor;
                         tripUpdate.vehicle = vehicleDescriptor;
                         tripUpdate.delay = bus.delay_min * 60;
-                        tripUpdate.timestamp = ((new Date().getTime() / 60000) - bus.updated_min_ago) * 60;
+                        tripUpdate.timestamp = bus.updated_at;
 
                         let entity = new GtfsRealtimeBindings.FeedEntity();
                         entity.id = bus.vehicle;
@@ -110,7 +110,7 @@ module.exports.vehiclePosition = function (req, res) {
                         vehiclePosition.position = position;
                         vehiclePosition.vehicle = vehicleDescriptor;
                         vehiclePosition.stop_id = bus.bus_stop;
-                        vehiclePosition.timestamp = ((new Date().getTime() / 60000) - bus.updated_min_ago) * 60;
+                        tripUpdate.timestamp = bus.updated_at;
                         vehiclePosition.trip = tripDescriptor;
 
                         let entity = new GtfsRealtimeBindings.FeedEntity();

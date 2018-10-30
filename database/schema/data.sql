@@ -775,7 +775,7 @@ CREATE UNLOGGED TABLE vehicle_positions (
     gps_date TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     delay_sec INTEGER NOT NULL,
     inserted_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP(0) WITH TIME ZONE DEFAULT NOW() NOT NULL,
     trip bigint NOT NULL,
     li_lfd_nr SMALLINT,
     line INTEGER,
@@ -793,6 +793,13 @@ CREATE UNLOGGED TABLE vehicle_positions (
 CREATE FUNCTION data_update_timestamps()
   RETURNS TRIGGER AS $$
 BEGIN
+  IF TG_OP = 'UPDATE'
+  THEN
+    NEW.inserted_at = OLD.inserted_at;
+  ELSE
+    NEW.inserted_at = NOW();
+  END IF;
+
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
@@ -800,9 +807,9 @@ $$
 LANGUAGE PLPGSQL;
 
 CREATE TRIGGER data_update_vehicle_positions
-  AFTER UPDATE ON vehicle_positions
-  FOR EACH ROW
-  EXECUTE PROCEDURE data_update_timestamps();
+  BEFORE INSERT OR UPDATE
+  ON data.vehicle_positions
+  FOR EACH ROW EXECUTE PROCEDURE data_update_timestamps();
 
 
 SELECT AddGeometryColumn('data', 'vehicle_positions', 'the_geom', 25832, 'POINT', 2); 
