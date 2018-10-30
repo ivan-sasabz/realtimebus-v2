@@ -3,17 +3,12 @@
 require("moment");
 require("../../util/functions");
 
+require("moment-timezone");
+
 const path = require('path');
 const mime = require('mime');
-
 const moment = require('moment');
-
-const csvParser = require('csv-parser');
-const json2csv = require('json2csv');
-
 const csv = require("csv");
-
-require("moment-timezone");
 
 const AdmZip = require("adm-zip");
 const fs = require("fs");
@@ -24,8 +19,6 @@ const spawn = require('child_process').spawnSync;
 
 const VdvFile = require("../../model/vdv/VdvFile");
 const HttpError = require("../../util/HttpError");
-
-const ExtrapolatePositions = require("../../operation/Extrapolator");
 
 const logger = require("../../util/logger");
 const config = require("../../config");

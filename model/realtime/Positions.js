@@ -32,7 +32,7 @@ const DB_PARAMS = {
     frt_zeit: "(EXTRACT(EPOCH FROM TIMEZONE('Europe/Rome', NOW()))::INT) % 86400 - departure % 86400",
     fzg_depot: "depot",
     fzg_nr: "vehicle",
-    gps_enabled_at: "insert_date",
+    gps_enabled_at: "inserted_at",
     gps_updated_at: "gps_date",
     hexcolor: "upper(hex)",
     hexcolor2: "'hexcolor2'",

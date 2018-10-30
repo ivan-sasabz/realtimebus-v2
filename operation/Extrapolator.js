@@ -14,7 +14,6 @@ module.exports = class Extrapolator {
     }
 
     run() {
-        // noinspection JSIgnoredPromiseFromCall
         this.runExtrapolation();
     }
 

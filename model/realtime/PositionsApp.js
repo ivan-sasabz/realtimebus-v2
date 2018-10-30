@@ -73,12 +73,12 @@ module.exports = class PositionsApp {
                         hue AS color_hue,
                         
                         ROUND(extract(epoch FROM (NOW() - gps_date))::int / 60) as updated_min_ago,
-                        ROUND(extract(epoch FROM (NOW() - insert_date))::int / 60) as inserted_min_ago,
+                        ROUND(extract(epoch FROM (NOW() - inserted_at))::int / 60) as inserted_min_ago,
                         
                         ROUND(delay_sec / 60) AS delay_min,
 
                         gps_date,
-                        insert_date,
+                        inserted_at,
                         
                         next_rec_ort.ort_nr AS bus_stop,
                         
@@ -135,7 +135,7 @@ module.exports = class PositionsApp {
                     ${tripFilter}
                     
                     GROUP BY vehicle, rec_frt.trip, rec_lid.line_name, line_colors.hex, line_colors.hue,
-                             vehicle_positions.gps_date, vehicle_positions.insert_date, vehicle_positions.delay_sec, 
+                             vehicle_positions.gps_date, vehicle_positions.inserted_at, vehicle_positions.delay_sec, 
                             next_rec_ort.ort_nr, vehicle_positions.the_geom, vehicle_positions.extrapolation_geom
                     
                     ORDER BY vehicle DESC, gps_date DESC

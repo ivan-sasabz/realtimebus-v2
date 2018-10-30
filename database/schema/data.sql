@@ -271,7 +271,7 @@ BEGIN
     UPDATE data.vehicle_positions
     SET extrapolation_linear_ref=extrapolated_linear_ref_var,
         extrapolation_geom=extrapolated_position_var,
-        status='r'
+        status='r',
     WHERE trip=teq_arg;
 
     RETURN 1;
@@ -772,25 +772,41 @@ CREATE TABLE travel_times (
 --
 
 CREATE UNLOGGED TABLE vehicle_positions (
-    gps_date timestamp(0) with time zone NOT NULL,
+    gps_date TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     delay_sec INTEGER NOT NULL,
-    insert_date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    inserted_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NOW() NOT NULL,
     trip bigint NOT NULL,
     li_lfd_nr SMALLINT,
     line INTEGER,
     variant SMALLINT,
-    interpolation_linear_ref double precision,
-    interpolation_distance double precision,
-    extrapolation_linear_ref double precision,
-    arrival_time timestamp without time zone,
+    interpolation_linear_ref DOUBLE PRECISION,
+    interpolation_distance DOUBLE PRECISION,
+    extrapolation_linear_ref DOUBLE PRECISION,
+    arrival_time timestamp without TIME zone,
     status VARCHAR(1),
     vehicle SMALLINT NOT NULL,
     depot VARCHAR(2)
 );
 
 
+CREATE FUNCTION data_update_timestamps()
+  RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER data_update_vehicle_positions
+  AFTER UPDATE ON vehicle_positions
+  FOR EACH ROW
+  EXECUTE PROCEDURE data_update_timestamps();
+
+
 SELECT AddGeometryColumn('data', 'vehicle_positions', 'the_geom', 25832, 'POINT', 2); 
-SELECT AddGeometryColumn('data', 'vehicle_positions', 'extrapolation_geom', 25832, 'POINT', 2); 
+SELECT AddGeometryColumn('data', 'vehicle_positions', 'extrapolation_geom', 25832, 'POINT', 2);
 --
 -- TOC entry 3812 (class 0 OID 0)
 -- Dependencies: 183
