@@ -136,7 +136,8 @@ module.exports = class PositionsApp {
                     
                     GROUP BY vehicle, rec_frt.trip, rec_lid.line_name, line_colors.hex, line_colors.hue,
                              vehicle_positions.gps_date, vehicle_positions.inserted_at, vehicle_positions.delay_sec, 
-                            next_rec_ort.ort_nr, vehicle_positions.the_geom, vehicle_positions.extrapolation_geom
+                            next_rec_ort.ort_nr, vehicle_positions.the_geom, vehicle_positions.extrapolation_geom,
+                            updated_at
                     
                     ORDER BY vehicle DESC, gps_date DESC
                `
