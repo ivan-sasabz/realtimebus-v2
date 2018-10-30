@@ -110,7 +110,7 @@ module.exports.vehiclePosition = function (req, res) {
                         vehiclePosition.position = position;
                         vehiclePosition.vehicle = vehicleDescriptor;
                         vehiclePosition.stop_id = bus.bus_stop;
-                        tripUpdate.timestamp = bus.updated_at;
+                        vehiclePosition.timestamp = bus.updated_at;
                         vehiclePosition.trip = tripDescriptor;
 
                         let entity = new GtfsRealtimeBindings.FeedEntity();
