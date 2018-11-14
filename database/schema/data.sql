@@ -32,7 +32,7 @@ CREATE FUNCTION data_bigint_2_degree(data_bigint bigint) RETURNS double precisio
     LANGUAGE plpgsql IMMUTABLE COST 10
     AS $$
         BEGIN
-		RETURN 
+		RETURN
 		data_bigint/10000000::bigint + --degrees
 		((data_bigint % 10000000::bigint) /  100000) * (1::float / 60::float) +  -- minutes
 		((data_bigint % 100000::bigint) /  1000)  * (1::float / 3600::float) + -- seconds
@@ -109,7 +109,7 @@ BEGIN
     SELECT trip, departure INTO frt
     FROM data.rec_frt
     WHERE teq = teq_arg;
-  
+
     IF EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - CURRENT_DATE)) < frt.departure - 10
        AND pos_record.delay_sec = 0 THEN
 
@@ -147,7 +147,7 @@ BEGIN
     pos_record.x_act, pos_record.y_act,
     pos_record.ort_nr, pos_record.next_ort_nr, pos_record.ort_edge_id,
     pos_record.dx, pos_record.dy;
-    
+
     IF pos_record.trip IS NULL THEN
         RAISE WARNING 'No record found with trip: %', pos_record.trip;
         UPDATE data.vehicle_positions
@@ -157,14 +157,14 @@ BEGIN
         WHERE trip=teq_arg;
         RETURN NULL;
     END IF;
-    
+
     SELECT COUNT(*) INTO cnt_lfd
     FROM data.rec_frt
     INNER JOIN data.lid_verlauf
         ON lid_verlauf.line=rec_frt.line
         AND lid_verlauf.variant=rec_frt.variant
     WHERE teq=teq_arg;
-    
+
     IF cnt_lfd=0 THEN
         RAISE WARNING 'teq % has no entries in lid_verlauf', pos_record.trip;
         UPDATE data.vehicle_positions
@@ -202,7 +202,7 @@ BEGIN
     WHERE verlauf_start.line=pos_record.line
         AND verlauf_start.variant=pos_record.variant
         AND verlauf_start.li_lfd_nr=pos_record.li_lfd_nr;
-        
+
     RAISE DEBUG 'lfd_start: %, lfd_end: % s, ort_start %, ort_end: %, sel_fzt: %', rec_sel_fzt.lfd_start, rec_sel_fzt.lfd_end, rec_sel_fzt.ort_start, rec_sel_fzt.ort_end, rec_sel_fzt.sel_fzt;
 
     IF rec_sel_fzt.sel_fzt IS NULL THEN
@@ -214,8 +214,8 @@ BEGIN
         WHERE trip=teq_arg;
         RETURN NULL;
     END IF;
-        
-    
+
+
     IF elapsed_time <= 0 THEN
         IF pos_record.status <> 'e' THEN
             UPDATE data.vehicle_positions
@@ -251,7 +251,7 @@ BEGIN
     RAISE DEBUG 'completed: %, interpolation_linear_ref: %, extrapolation_linear_ref: %, weighting factor: %, weighted dx: %, weighted dy: %',
             extrapolated_completion,
             pos_record.interpolation_linear_ref,
-            extrapolated_linear_ref_var, (1 - extrapolated_completion), 
+            extrapolated_linear_ref_var, (1 - extrapolated_completion),
             (1 - extrapolated_completion) * pos_record.dx,
             (1 - extrapolated_completion) * pos_record.dy;
 
@@ -298,12 +298,12 @@ CREATE FUNCTION data_extrapolate_positions() RETURNS INTEGER
             LEFT JOIN data.rec_frt ON vehicle_positions.trip=rec_frt.teq
             WHERE rec_frt.trip IS NULL   -- not found in rec_frt
                 OR departure < EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - CURRENT_DATE)) -- should have already started
-                OR delay_sec < 0   -- anticipated start 
+                OR delay_sec < 0   -- anticipated start
             ORDER BY trip;
         num_frts INTEGER;
         num_insert INTEGER DEFAULT 0;
         num_extrapolations INTEGER DEFAULT 0;
-        
+
     BEGIN
     num_frts := 0;
 
@@ -320,7 +320,7 @@ CREATE FUNCTION data_extrapolate_positions() RETURNS INTEGER
 
     -- RAISE INFO 'inserted % records processed, extrapolated % new positions',
     --         num_frts, num_extrapolations;
-    
+
     RETURN num_extrapolations;
 END;
 $$;
@@ -339,20 +339,20 @@ CREATE FUNCTION data_fill_frt_travel_times(trip_arg bigint) RETURNS INTEGER
         this_line INTEGER;
         this_variant SMALLINT;
         this_trip_time_group INTEGER;
-        
+
         outer_lfd_cursor refcursor;
         from_to_stop record;
         from_stop INTEGER;
         to_stop INTEGER;
-        
+
         num_inserts INTEGER;
 
         departure_lfd INTEGER;
         frt_max_lfd INTEGER;
         frt_cnt INTEGER;
-        
+
         travel_time_seconds INTEGER;
-        
+
         inner_lfd_cursor CURSOR (this_line INTEGER, this_variant SMALLINT, this_trip_time_group INTEGER, from_stop INTEGER, to_stop INTEGER) FOR
             SELECT SUM(COALESCE(sel_fzt))
             FROM data.lid_verlauf lid_verlauf_start
@@ -370,10 +370,10 @@ CREATE FUNCTION data_fill_frt_travel_times(trip_arg bigint) RETURNS INTEGER
             WHERE lid_verlauf_start.line=this_line
                 AND lid_verlauf_start.variant=this_variant
                 AND lid_verlauf_start.li_lfd_nr >= from_stop;
-        
+
     BEGIN
     num_inserts := 0;
-    
+
     DELETE FROM data.travel_times WHERE trip=trip_arg;
 
     SELECT COUNT(*), MAX(li_lfd_nr) INTO frt_cnt, frt_max_lfd
@@ -388,7 +388,7 @@ CREATE FUNCTION data_fill_frt_travel_times(trip_arg bigint) RETURNS INTEGER
         RAISE NOTICE 'trip % has no lid_verlauf', trip_arg;
         RETURN 0;
     END IF;
-    
+
     -- get line attributes
     SELECT rec_lid.line, rec_lid.variant, rec_frt.trip_time_group
         INTO this_line, this_variant, this_trip_time_group
@@ -418,39 +418,39 @@ CREATE FUNCTION data_fill_frt_travel_times(trip_arg bigint) RETURNS INTEGER
             AND lvsp.li_lfd_nr < lvep.li_lfd_nr
         WHERE rec_frt.trip=trip_arg
         ORDER BY lvsp.li_lfd_nr, lvep.li_lfd_nr;
-    
+
     RAISE INFO 'line %, variant %', this_line, this_variant;
-        
+
     LOOP
         FETCH outer_lfd_cursor INTO from_stop, to_stop;
-        
+
         IF from_stop IS NULL THEN
             -- exit loop
             EXIT;
         END IF;
-        
+
         -- RAISE INFO 'line % variant % trip_time_group % from % to %', this_line, this_variant, this_trip_time_group, from_stop, to_stop;
         OPEN inner_lfd_cursor(this_line, this_variant, this_trip_time_group, from_stop, to_stop);
         LOOP
             FETCH inner_lfd_cursor INTO travel_time_seconds;
-            
+
             -- RAISE INFO 'seconds %', travel_time_seconds;
             IF travel_time_seconds IS NULL THEN
                 EXIT;
             END IF;
             -- RAISE NOTICE 'seconds %', travel_time_seconds;
-            
+
             -- write into the table with the travel times
             INSERT INTO data.travel_times (trip, li_lfd_nr_start, li_lfd_nr_end, travel_time)
             VALUES (trip_arg, from_stop, to_stop, travel_time_seconds);
-            
+
         END LOOP;
-        
+
         CLOSE inner_lfd_cursor;
         num_inserts := num_inserts+1;
 
     END LOOP;
-    
+
     RETURN num_inserts;
 END;
 $$;
@@ -471,9 +471,9 @@ CREATE FUNCTION data_fill_travel_times() RETURNS INTEGER
             FROM data.rec_frt
             ORDER BY trip;
         num_frts INTEGER DEFAULT 0; -- processed frts
-        tot_frts INTEGER DEFAULT 0; -- total number of frts 
+        tot_frts INTEGER DEFAULT 0; -- total number of frts
         num_insert INTEGER DEFAULT 0;
-        
+
     BEGIN
 
     SELECT COUNT(*) INTO tot_frts FROM data.rec_frt;
@@ -484,7 +484,7 @@ CREATE FUNCTION data_fill_travel_times() RETURNS INTEGER
 	    RAISE NOTICE 'inserted % records for trip %, %/% records processed',
             num_insert, recordvar.trip, num_frts, tot_frts;
     END LOOP;
-    
+
     RETURN num_frts;
 END;
 $$;
@@ -597,7 +597,7 @@ CREATE TABLE ort_edges (
     end_ort_nr INTEGER
 );
 
-SELECT AddGeometryColumn('data', 'ort_edges', 'the_geom', 25832, 'LINESTRING', 2); 
+SELECT AddGeometryColumn('data', 'ort_edges', 'the_geom', 25832, 'LINESTRING', 2);
 --
 -- TOC entry 182 (class 1259 OID 985339)
 -- Dependencies: 7 181
@@ -704,7 +704,7 @@ CREATE TABLE rec_lid (
     foreign_company INTEGER
 );
 
-SELECT AddGeometryColumn('data', 'rec_lid', 'the_geom', 25832, 'LINESTRING', 2); 
+SELECT AddGeometryColumn('data', 'rec_lid', 'the_geom', 25832, 'LINESTRING', 2);
 
 --
 -- TOC entry 174 (class 1259 OID 591726)
@@ -731,7 +731,7 @@ CREATE TABLE rec_ort (
     richtungswechsel SMALLINT
 );
 
-SELECT AddGeometryColumn('data', 'rec_ort', 'the_geom', 25832, 'POINT', 2); 
+SELECT AddGeometryColumn('data', 'rec_ort', 'the_geom', 25832, 'POINT', 2);
 
 --
 -- TOC entry 175 (class 1259 OID 591735)
@@ -812,7 +812,7 @@ CREATE TRIGGER data_update_vehicle_positions
   FOR EACH ROW EXECUTE PROCEDURE data_update_timestamps();
 
 
-SELECT AddGeometryColumn('data', 'vehicle_positions', 'the_geom', 25832, 'POINT', 2); 
+SELECT AddGeometryColumn('data', 'vehicle_positions', 'the_geom', 25832, 'POINT', 2);
 SELECT AddGeometryColumn('data', 'vehicle_positions', 'extrapolation_geom', 25832, 'POINT', 2);
 --
 -- TOC entry 3812 (class 0 OID 0)
@@ -1310,11 +1310,11 @@ INSERT INTO line_colors (line, red, green, blue, hex, hue) VALUES
     (2, 68, 145, 108, '4caf50', 160),
     (3, 3, 163, 251, '2196f3', 205),
     (4, 248, 195, 0, 'ffeb3b', 60),
-    (6, 153, 97, 136, 'f06292', 330),
-    (13, 77, 72, 91, '9c27b0', 280),
+    (6, 153, 97, 136, 'BA68C8', 330),
+    (13, 77, 72, 91, '4527A0', 280),
     (110, 3, 163, 215, '2196f3', 200),
     (111, 89, 93, 156, '2962ff', 215),
-    (112, 0, 73, 107, '3f51b5', 240),
+    (112, 0, 73, 107, '3F51B5', 240),
     (116, 0, 73, 107, '3f51b5', 240),
     (117, 0, 73, 107, '3f51b5', 240),
     (183, 255, 162, 0, '3f51b5', 240),
@@ -1325,14 +1325,14 @@ INSERT INTO line_colors (line, red, green, blue, hex, hue) VALUES
     (213, 0, 116, 133, '009688', 175),
     (214, 0, 73, 107, '3f51b5', 240),
     (215, 231, 176, 0, 'ffeb3b', 60),
-    (221, 0, 73, 107, '8bc34a', 100),
+    (221, 0, 73, 107, '607D8B', 100),
     (222, 0, 73, 107, '3f51b5', 240),
     (223, 0, 73, 107, '3f51b5', 240),
     (224, 0, 73, 107, '3f51b5', 240),
     (225, 0, 73, 107, '3f51b5', 240),
     (248, 0, 73, 107, '3f51b5', 240),
     (1001, 178, 62, 62, 'c62828', 0),
-    (1003, 142, 132, 183, 'f06292', 330),
+    (1003, 142, 132, 183, 'BA68C8', 330),
     (1005, 149, 127, 102, '795548', 25),
     (1006, 0, 116, 133, '009688', 175),
     (1071, 231, 120, 23, 'ff9800', 45),
@@ -1344,7 +1344,7 @@ INSERT INTO line_colors (line, red, green, blue, hex, hue) VALUES
     (1011, 248, 195, 0, 'ffeb3b', 60),
     (1012, 105, 64, 110, '9c27b0', 280),
     (1014, 0, 146, 63, '4caf50', 120),
-    (1015, 255, 87, 34, 'ff5722', 20),
+    (1015, 255, 87, 34, 'FF5722', 20),
     (1018, 158, 158, 158, '9e9e9e', 60),
     (1153, 77, 72, 91, '9c27b0', 280);
 

@@ -81,6 +81,12 @@ let sqlCreateChain = [];
 let sqlInsertChain = [];
 
 
+const fixedCoordinates = {
+    5058: {lat: 46.44905, lng: 11.33660},
+    5112: {lat: 46.50734, lng: 11.34720}
+};
+
+
 module.exports.upload = function (req, res) {
     let data = [];
 
@@ -1472,6 +1478,17 @@ function fixBusStopNames() {
                     record.push("wheelchair_boarding");
                 } else {
                     record.push(1);
+                }
+
+                if (record[0] !== "stop_id") {
+                    if (record[0] in fixedCoordinates) {
+                        console.log(`Changing coordinates for bus stop ${record[0]}`);
+
+                        let newStop = fixedCoordinates[record[0]];
+
+                        record[2] = newStop['lat'];
+                        record[3] = newStop['lng'];
+                    }
                 }
 
                 if (record[1].indexOf("-") < 0) {
