@@ -72,7 +72,7 @@ DECLARE
     extrapolated_linear_ref_var DOUBLE PRECISION DEFAULT 0;
     extrapolated_position_var geometry;
     max_li_lfd_nr INTEGER;
-    distance_to_end DOUBLE PRECISION;q
+    distance_to_end DOUBLE PRECISION;
     frt RECORD;
     complete_travel_time INTEGER;
 BEGIN
